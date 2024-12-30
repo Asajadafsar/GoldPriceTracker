@@ -4,19 +4,19 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// Shortcode to display gold prices
+// Shortcode to display prices
 function gold_price_shortcode() {
     // API key
     $api_key = '290cdf5f927b479f1ba427d5e687f7f5';
 
-    // Retrieve saved settings
+    // Get saved settings
     $selected_currencies = get_option('gold_price_settings', ['EUR', 'XAU', 'XAG']);
 
-    // Construct API URL based on selected currencies
+    // Construct API URL
     $currencies = implode(',', $selected_currencies);
     $api_url = "https://api.metalpriceapi.com/v1/latest?api_key=$api_key&base=USD&currencies=$currencies";
 
-    // Send request to the API
+    // Send request to API
     $response = wp_remote_get($api_url, ['timeout' => 15]);
     if (is_wp_error($response)) {
         return '<div>Error retrieving data.</div>';
@@ -24,12 +24,25 @@ function gold_price_shortcode() {
 
     $data = json_decode(wp_remote_retrieve_body($response), true);
 
-    // Validate API data
+    // Check data validity
     if (empty($data) || !isset($data['rates'])) {
         return '<div>No data available for display.</div>';
     }
 
-    // Build output
+    // Enqueue styles and scripts
+    wp_enqueue_style(
+        'gold-price-widget-style',
+        plugins_url('public/style.css', dirname(__FILE__)) // Set correct path to style.css
+    );
+    wp_enqueue_script(
+        'gold-price-widget-script',
+        plugins_url('public/script.js', dirname(__FILE__)), // Set correct path to script.js
+        [],
+        false,
+        true
+    );
+
+    // Build HTML output
     $output = '<div class="gold-price-widget"><h3>Gold Prices</h3><ul>';
     foreach ($data['rates'] as $currency => $rate) {
         $output .= "<li><strong>$currency:</strong> " . number_format($rate, 2) . " USD</li>";
@@ -39,3 +52,19 @@ function gold_price_shortcode() {
     return $output;
 }
 add_shortcode('gold_price', 'gold_price_shortcode');
+
+// Register and enqueue CSS and JS files
+function gold_price_enqueue_assets() {
+    wp_register_style(
+        'gold-price-widget-style',
+        plugins_url('public/style.css', dirname(__FILE__)) // Set correct path to style.css
+    );
+    wp_register_script(
+        'gold-price-widget-script',
+        plugins_url('public/script.js', dirname(__FILE__)), // Set correct path to script.js
+        [],
+        false,
+        true
+    );
+}
+add_action('wp_enqueue_scripts', 'gold_price_enqueue_assets');
