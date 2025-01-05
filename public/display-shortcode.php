@@ -7,14 +7,14 @@ if (!defined('ABSPATH')) {
 // Shortcode to display prices
 function gold_price_shortcode() {
     // API key
-    $api_key = '290cdf5f927b479f1ba427d5e687f7f5';
+    $api_key = '30899aff9f4e6886270730b63e66b0e7';
 
     // Get saved settings
     $selected_currencies = get_option('gold_price_settings', ['EUR', 'XAU', 'XAG']);
 
     // Construct API URL
     $currencies = implode(',', $selected_currencies);
-    $api_url = "https://api.metalpriceapi.com/v1/latest?api_key=$api_key&base=USD&currencies=$currencies";
+    $api_url = "https://api.metalpriceapi.com/v1/latest?api_key=30899aff9f4e6886270730b63e66b0e7&base=USD&currencies=EUR,XAU,XAG";
 
     // Send request to API
     $response = wp_remote_get($api_url, ['timeout' => 15]);
